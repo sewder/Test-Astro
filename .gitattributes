@@ -1,0 +1,16 @@
+# Normalize line endings to LF in the repository
+* text=auto eol=lf
+
+# Keep Windows batch files with CRLF
+*.bat text eol=crlf
+
+# Treat common binary assets as binary (no EOL conversion)
+*.png -text
+*.jpg -text
+*.jpeg -text
+*.gif -text
+*.webp -text
+*.svg -text
+*.ico -text
+*.pdf -text
+

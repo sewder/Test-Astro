@@ -1,0 +1,74 @@
+---
+import PostLayout from "../../layouts/PostLayout.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+function readMinutes(text = "") {
+  const words = text
+    .replace(/[`*_>#-]/g, " ")
+    .replace(/\[(.*?)\]\((.*?)\)/g, "$1")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200));
+}
+
+const { post } = Astro.props;
+const { Content, remarkPluginFrontmatter } = await post.render();
+
+const minutes = readMinutes(remarkPluginFrontmatter?.rawContent ?? "");
+const dateLabel = new Intl.DateTimeFormat("tr-TR", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+}).format(post.data.pubDate).toUpperCase();
+
+// Allow optional hero fields that are not part of the strict content schema
+const d = post.data as any;
+console.log("a"
+)
+console.log(d.hero
+)
+console.log("a"
+)
+// Debug logs removed
+---
+
+<PostLayout title={post.data.title}>
+  <!-- Narrow, centered title block -->
+  <section class="article">
+    <h1 class="title">{post.data.title}</h1>
+    <div class="meta-below">{dateLabel} • {minutes} dakika</div>
+  </section>
+
+  <!-- Wide hero (optional) -->
+  <figure class="hero">
+    <img src={d.hero } alt={d.heroAlt || post.data.title} />
+    {(d.heroCredit || d.heroCreditUrl) && (
+      <figcaption class="caption">
+        görsel kaynağı{" "}
+        {d.heroCreditUrl
+          ? <a href={d.heroCreditUrl} target="_blank" rel="noreferrer">
+              {d.heroCredit || d.heroCreditUrl}
+            </a>
+          : d.heroCredit}
+      </figcaption>
+    )}
+  </figure>
+
+  <!-- True middle reading column -->
+  <article class="prose">
+    <Content />
+  </article>
+
+  <!-- Meta at bottom removed in favor of meta-top -->
+</PostLayout>

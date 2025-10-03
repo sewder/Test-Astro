@@ -1,0 +1,100 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import Orion from "../assets/images/orion.svg?component"; // use component OR url (pick one)
+
+const posts = (await getCollection("blog"))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+function estimateMinutes(text = "") {
+  const words = text
+    .replace(/[`*_>#-]/g, " ")
+    .replace(/\[(.*?)\]\((.*?)\)/g, "$1")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ").filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200));
+}
+
+const fmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "short" });
+
+const items = posts.map((p) => ({
+  slug: p.slug,
+  title: p.data.title,
+  dateLabel: fmt.format(p.data.pubDate).toUpperCase(),
+  minutes: typeof p.data.readingTime === "number"
+    ? p.data.readingTime
+    : estimateMinutes(p.data.description ?? ""),
+}));
+
+const INITIAL_COUNT = 5;
+---
+
+<BaseLayout title="Arşiv">
+  <section class="orion">
+    <Orion class="orion-img" aria-hidden="true" />
+    <!-- If you prefer <img>, swap the two lines:
+    <img src={orionUrl} alt="Orion" class="orion-img" />
+    -->
+  </section>
+
+  <ul class="list" id="post-list">
+    {items.map((it, idx) => (
+      <li class={`row ${idx >= INITIAL_COUNT ? "hidden" : ""}`} data-idx={idx}>
+        <span class="date">{it.dateLabel}</span>
+        <a class="title" href={`/blog/${it.slug}/`}>{it.title}</a>
+        <span class="read">{it.minutes} dakika</span>
+      </li>
+    ))}
+  </ul>
+
+  {items.length > INITIAL_COUNT && (
+    <div class="more-wrap">
+      <button id="load-more" class="more-btn">DAHA FAZLA YÜKLE</button>
+    </div>
+  )}
+
+  <style>
+    :root { --muted:#7aa7a8; --line:#e9efef; --text:#0f172a; --soft:#97d5d0; }
+
+    /* HERO */
+    .orion{display:grid;place-items:center;margin:2.5rem 0 1rem;text-align:center}
+    .orion-img{width:120px;height:120px;display:block;opacity:.95}
+    .orion-img {
+    width: 120px;  /* scales with CSS */
+    height: 120px; }
+    /* LIST */
+    .list{list-style:none;padding:0;margin:1rem auto;max-width:860px;border-top:1px solid var(--line)}
+    .row{display:grid;grid-template-columns:100px 1fr 90px;align-items:center;gap:1rem;padding:.9rem 0;border-bottom:1px solid var(--line)}
+    .row.hidden{display:none}
+    .date{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase}
+    .title{color:var(--text);text-decoration:none}
+    .title:hover{text-decoration:underline}
+    .read{justify-self:end;font-size:.9rem;color:#94a3b8;white-space:nowrap}
+
+    /* BUTTON */
+    .more-wrap{display:grid;place-items:center;margin:1.25rem 0 2.5rem}
+    .more-btn{border:1px solid var(--soft);background:white;color:#0f766e;padding:.6rem 1rem;border-radius:.6rem;font-weight:700;cursor:pointer}
+    .more-btn:hover{background:#ecfdf5}
+
+    @media (max-width:640px){
+      .row{grid-template-columns:80px 1fr 70px}
+    }
+  </style>
+
+    <script>
+    const btn = document.getElementById('load-more');
+    if (btn instanceof HTMLButtonElement) {
+        btn.addEventListener('click', () => {
+        const hidden = Array.from(document.querySelectorAll('.row.hidden')).slice(0, 5);
+        hidden.forEach(el => el.classList.remove('hidden'));
+        if (!document.querySelector('.row.hidden')) {
+            btn.disabled = true;                 // now OK
+            btn.textContent = 'Hepsi yüklendi';
+        }
+        });
+    }
+    </script>
+
+</BaseLayout>

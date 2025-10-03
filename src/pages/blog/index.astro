@@ -1,0 +1,118 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const posts = (await getCollection("blog")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const fmtDayMonth = new Intl.DateTimeFormat("tr-TR", {
+  day: "2-digit",
+  month: "long",
+});
+
+const groups = posts.reduce((acc, p) => {
+  const y = new Date(p.data.pubDate).getFullYear();
+  (acc[y] ||= []).push({
+    slug: p.slug,
+    title: p.data.title,
+    dateLabel: fmtDayMonth.format(p.data.pubDate),
+  });
+  return acc;
+}, {} as Record<number, { slug: string; title: string; dateLabel: string }[]>);
+
+const years = Object.keys(groups)
+  .map((y) => Number(y))
+  .sort((a, b) => b - a);
+---
+
+<BaseLayout title="Arşiv">
+  <main class="wrap">
+    <h1 class="page-title">Arşiv</h1>
+
+    <div class="search-wrap">
+      <input id="search" class="search" placeholder="Arşivde ara… (#etiket şeklinde de arayabilirsin)" />
+    </div>
+
+    {years.map((y) => (
+      <section>
+        <h2 class="year">{y}</h2>
+        <ul class="archive">
+          {groups[y].map((it) => (
+            <li class="row" data-title={it.title.toLowerCase()}>
+              <span class="date">{it.dateLabel}</span>
+              <a class="title" href={`/blog/${it.slug}/`}>{it.title}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </main>
+
+  <script>
+    const input = document.getElementById("search") as HTMLInputElement | null;
+    const rows = Array.from(document.querySelectorAll<HTMLElement>(".row"));
+    input?.addEventListener("input", () => {
+      const q = input.value.trim().toLowerCase();
+      rows.forEach((el) => {
+        const t = el.getAttribute("data-title") || "";
+        el.classList.toggle("hidden", q && !t.includes(q));
+      });
+    });
+  </script>
+
+  <style>
+    :root { --muted:#64748b; --text:#0f172a; --line:#e5e7eb; }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px 40px;
+    }
+
+    .page-title {
+      font-weight: 800;
+      font-size: clamp(1.8rem, 1.3rem + 2vw, 2.6rem);
+      margin: 28px 0 16px;
+    }
+
+    .search-wrap { margin: 6px 0 18px; }
+
+    .search {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      outline: none;
+      font-size: 0.95rem;
+    }
+
+    .year {
+      margin: 26px 0 10px;
+      font-size: 1.25rem;
+      letter-spacing: 0.02em;
+    }
+
+    .archive { list-style: none; margin: 0; padding: 0; }
+
+    .row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 14px;
+      padding: 14px 0;
+      border-top: 1px solid var(--line);
+      align-items: baseline;
+    }
+
+    .row:last-child { border-bottom: 1px solid var(--line); }
+
+    .date { color: var(--muted); font-size: 0.9rem; }
+
+    .title { color: var(--text); text-decoration: none; font-weight: 600; }
+    .title:hover { text-decoration: underline; }
+
+    .hidden { display: none; }
+  </style>
+</BaseLayout>
+
+
