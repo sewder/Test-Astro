@@ -3,10 +3,10 @@ const { active } = Astro.props;
 ---
 
 <header class="site-header">
-  <a href="/Test-Astro/" class="logo">Orion</a>
+  <a href="/" class="logo">Orion</a>
   <nav>
-    <a href="/Test-Astro/" class={active === "home" ? "active" : ""}>Anasayfa</a>
-    <a href="/Test-Astro/blog" class={active === "archive" ? "active" : ""}>Arşiv</a>
+    <a href="/" class={active === "home" ? "active" : ""}>Anasayfa</a>
+    <a href="/blog" class={active === "archive" ? "active" : ""}>Arşiv</a>
   </nav>
   <style>
     .site-header {
