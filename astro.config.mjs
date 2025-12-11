@@ -8,9 +8,11 @@ import cloudflare from "@astrojs/cloudflare";
 // 'https://<user>.github.io/<repo>' and base to '/<repo>'
 // If deploying to a user/organization site, use site 'https://<user>.github.io' and base '/'
 export default defineConfig({
-  site: 'https://sewder.github.io',
-  base: '/',
-  adapter: cloudflare(),
+  // site: 'https://sewder.github.io',
+  // base: '/',
+  adapter: cloudflare({
+    imageService: 'passthrough',
+  }),
 
   markdown: {
     remarkPlugins: [remarkMath],

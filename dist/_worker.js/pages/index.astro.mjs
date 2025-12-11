@@ -1,7 +1,7 @@
 globalThis.process ??= {}; globalThis.process.env ??= {};
-import { c as createComponent, r as renderComponent, b as renderTemplate, m as maybeRenderHead, d as addAttribute, e as renderScript } from '../chunks/astro/server_xluZHftt.mjs';
-import { $ as $$BaseLayout } from '../chunks/BaseLayout_C5Pp4Ay3.mjs';
-import { g as getCollection } from '../chunks/Nav_CS8egwXs.mjs';
+import { c as createComponent, r as renderComponent, b as renderTemplate, m as maybeRenderHead, d as addAttribute, e as renderScript } from '../chunks/astro/server_CHN-AX6y.mjs';
+import { $ as $$BaseLayout } from '../chunks/BaseLayout_B7DTDZZz.mjs';
+import { g as getCollection } from '../chunks/Nav_BIVmXxvT.mjs';
 /* empty css                                 */
 export { renderers } from '../renderers.mjs';
 
