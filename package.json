@@ -13,13 +13,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@astrojs/cloudflare": "^12.6.9",
+    "@astrojs/cloudflare": "^12.6.12",
     "katex": "^0.16.22",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0"
   },
   "devDependencies": {
     "astro": "^5.14.1",
-    "wrangler": "^4.42.0"
+    "wrangler": "^4.54.0"
   }
 }
