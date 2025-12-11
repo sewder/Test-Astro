@@ -40,7 +40,7 @@ const dateLabel = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 }).format(post.data.pubDate).toUpperCase();
 
-// Legacy Hero Support (from old [slug].astro)
+// Legacy Hero Support
 const d = post.data as any;
 ---
 
@@ -50,13 +50,13 @@ const d = post.data as any;
     <div class="meta-below">{dateLabel}</div>
   </section>
 
-  {/* Hero Image Block - Re-added for support, with new constraints */}
+  {/* Hero Image Block */}
   {d.hero && (
     <figure class="hero">
       <img src={d.hero} alt={d.heroAlt || post.data.title} />
       {(d.heroCredit || d.heroCreditUrl) && (
         <figcaption class="caption">
-          görsel kaynağı{" "}
+          Image Source{" "}
           {d.heroCreditUrl
             ? <a href={d.heroCreditUrl} target="_blank" rel="noreferrer">
                 {d.heroCredit || d.heroCreditUrl}
@@ -67,7 +67,7 @@ const d = post.data as any;
     </figure>
   )}
 
-  {/* Topics List Block - New feature */}
+  {/* Topics List Block */}
   {children.length > 0 && (
     <nav class="toc-children">
       <h2>Topics</h2>
@@ -129,7 +129,6 @@ const d = post.data as any;
     font-size: 0.9rem;
   }
   
-  /* Ensure hero constraint in this file too just in case */
   .hero img {
     width: 100%;
     max-width: 700px;

@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 // NOTE: For GitHub Pages project site, set site to
@@ -8,6 +9,8 @@ import rehypeKatex from "rehype-katex";
 // If deploying to a user/organization site, use site 'https://<user>.github.io' and base '/'
 export default defineConfig({
   site: 'https://sewder.github.io',
+  base: '/',
+  adapter: cloudflare(),
 
   markdown: {
     remarkPlugins: [remarkMath],

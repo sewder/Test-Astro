@@ -4,7 +4,7 @@ const { title } = Astro.props;
 ---
 
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -67,16 +67,26 @@ const { title } = Astro.props;
         gap: 16px;
       }
 
-      /* Main container - ensures everything is centered */
+      /* Main container - center content in the viewport */
       main {
         max-width: var(--wrap-wide);
         margin: 0 auto;
         padding: 0 16px;
+        /* center the slot content both horizontally and vertically */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        /* leave room for header; adjust if your header height changes */
+        min-height: calc(100vh - 80px);
       }
 
       /* Title block (narrow and centered) */
       .article {
-        max-width: var(--reading);
+        /* allow the article block to span the available width so centering
+           places the title in the middle of the viewport */
+        width: 100%;
+        max-width: var(--wrap-wide);
         margin: 0 auto;
         padding: 0 20px 40px;
         /* make the article a centered column so children (h1, meta) are centered
@@ -84,6 +94,7 @@ const { title } = Astro.props;
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
         text-align: center;
       }
 
@@ -103,6 +114,36 @@ const { title } = Astro.props;
         margin: 10px auto 6px;
         max-width: none;
         text-align: center;
+        align-self: center; /* ensures the h1 centers inside flex parent */
+        display: inline-block; /* shrink-to-fit so align-self:center horizontally centers it */
+      }
+
+      /* Strong fallback: center the title relative to the viewport using transform.
+         This guarantees the heading sits in the middle of the page even if some
+         container widths or other styles interfere. Remove if you prefer centering
+         inside the content column instead. */
+      .title.viewport-center {
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: min(90ch, 100%);
+      }
+
+      /* Ensure article content is centered horizontally within the page */
+      .article {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+      }
+
+      /* Higher-specificity rule to ensure the title centers inside .article
+         across browsers and if other rules interfere */
+      .article > .title,
+      .article h1.title {
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
       }
 
       /* Hero image */
@@ -115,6 +156,9 @@ const { title } = Astro.props;
 
       .hero img {
         width: 100%;
+        max-width: 700px;
+        max-height: 250px;
+        object-fit: cover;
         height: auto;
         display: block;
         margin: 0 auto;
@@ -132,7 +176,17 @@ const { title } = Astro.props;
       .prose {
         max-width: var(--reading);
         margin: 18px auto 0;
-        text-align: left;
+        /* Use justified text and enable hyphenation to mimic Overleaf/LaTeX layout */
+        text-align: justify;
+        text-justify: inter-word;
+        -webkit-text-size-adjust: 100%;
+        -moz-hyphens: auto;
+        -ms-hyphens: auto;
+        -webkit-hyphens: auto;
+        hyphens: auto;
+      /* Try to balance lines for more even line lengths (progressive enhancement).
+        Note: not supported in all browsers, but helps on modern ones. */
+      text-wrap: balance;
         font-size: 1.05rem;
         word-break: break-word;
         overflow-wrap: anywhere;
@@ -155,6 +209,8 @@ const { title } = Astro.props;
 
       .prose img {
         max-width: 100%;
+        max-height: 400px;
+        object-fit: contain;
         height: auto;
       }
 

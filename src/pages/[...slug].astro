@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import PostLayout from "../../layouts/PostLayout.astro";
+import PostLayout from "../layouts/PostLayout.astro";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog");
@@ -8,20 +8,16 @@ export async function getStaticPaths() {
   return posts.map((post) => {
     // Find DIRECT children
     const children = posts.filter(p => {
-        // Normalize slugs to handle spaces vs dashes mismatch
-        const pSlug = p.slug.replace(/ /g, '-').toLowerCase();
-        const parentSlug = post.slug.replace(/ /g, '-').toLowerCase();
-
-        if (!pSlug.startsWith(parentSlug + "/")) return false;
-        if (pSlug === parentSlug) return false;
+        if (!p.slug.startsWith(post.slug + "/")) return false;
+        if (p.slug === post.slug) return false;
         
         // Remove the parent prefix
-        const relative = pSlug.substring(parentSlug.length + 1);
+        const relative = p.slug.substring(post.slug.length + 1);
         // If there's still a slash, it's a grandchild (or deeper)
         return !relative.includes('/');
     });
 
-    // Sort children by date or title
+    // Sort children by date or title (optional, can be improved later)
     children.sort((a, b) => a.data.pubDate > b.data.pubDate ? -1 : 1);
 
     return {
@@ -34,14 +30,11 @@ export async function getStaticPaths() {
 const { post, children } = Astro.props;
 const { Content } = await post.render();
 
-const dateLabel = new Intl.DateTimeFormat("en-US", {
+const dateLabel = new Intl.DateTimeFormat("tr-TR", {
   day: "2-digit",
   month: "short",
   year: "numeric",
 }).format(post.data.pubDate).toUpperCase();
-
-// Legacy Hero Support (from old [slug].astro)
-const d = post.data as any;
 ---
 
 <PostLayout title={post.data.title}>
@@ -50,24 +43,7 @@ const d = post.data as any;
     <div class="meta-below">{dateLabel}</div>
   </section>
 
-  {/* Hero Image Block - Re-added for support, with new constraints */}
-  {d.hero && (
-    <figure class="hero">
-      <img src={d.hero} alt={d.heroAlt || post.data.title} />
-      {(d.heroCredit || d.heroCreditUrl) && (
-        <figcaption class="caption">
-          görsel kaynağı{" "}
-          {d.heroCreditUrl
-            ? <a href={d.heroCreditUrl} target="_blank" rel="noreferrer">
-                {d.heroCredit || d.heroCreditUrl}
-              </a>
-            : d.heroCredit}
-        </figcaption>
-      )}
-    </figure>
-  )}
-
-  {/* Topics List Block - New feature */}
+  <!-- If there are children, list them -->
   {children.length > 0 && (
     <nav class="toc-children">
       <h2>Topics</h2>
@@ -113,6 +89,8 @@ const d = post.data as any;
     transition: all 0.2s;
     background: white;
   }
+  /* Dark mode support if needed, assuming global variables */
+  
   .collection-list li a:hover {
     background: rgba(var(--gray-900), 0.05);
     transform: translateY(-2px);
@@ -127,16 +105,5 @@ const d = post.data as any;
     margin: 0;
     color: rgb(var(--gray));
     font-size: 0.9rem;
-  }
-  
-  /* Ensure hero constraint in this file too just in case */
-  .hero img {
-    width: 100%;
-    max-width: 700px;
-    max-height: 250px;
-    object-fit: cover;
-    margin: 0 auto;
-    display: block;
-    border-radius: 6px;
   }
 </style>

@@ -6,7 +6,7 @@ const posts = (await getCollection("blog")).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
 );
 
-const fmtDayMonth = new Intl.DateTimeFormat("tr-TR", {
+const fmtDayMonth = new Intl.DateTimeFormat("en-US", {
   day: "2-digit",
   month: "long",
 });
@@ -26,12 +26,12 @@ const years = Object.keys(groups)
   .sort((a, b) => b - a);
 ---
 
-<BaseLayout title="Arşiv">
+<BaseLayout title="Archive">
   <main class="wrap">
-    <h1 class="page-title">Arşiv</h1>
+    <h1 class="page-title">Archive</h1>
 
     <div class="search-wrap">
-      <input id="search" class="search" placeholder="Arşivde ara… (#etiket şeklinde de arayabilirsin)" />
+      <input id="search" class="search" placeholder="Search archive... (or search by #tag)" />
     </div>
 
     {years.map((y) => (

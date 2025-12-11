@@ -2,6 +2,9 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 import Orion from "../assets/images/orion.svg?component"; // use component OR url (pick one)
+// Use a static hero image path. Ensure public/images/Orion.jpg exists.
+const base = import.meta.env.BASE_URL || '/';
+const heroJpg = `${base.replace(/\/$/, '')}/images/Orion.jpg`;
 
 const posts = (await getCollection("blog"))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
@@ -17,41 +20,68 @@ function estimateMinutes(text = "") {
   return Math.max(1, Math.round(words / 200));
 }
 
-const fmt = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "short" });
+const fmt = new Intl.DateTimeFormat("en-US", { day: "2-digit", month: "short" });
 
-const items = posts.map((p) => ({
-  slug: p.slug,
-  title: p.data.title,
-  dateLabel: fmt.format(p.data.pubDate).toUpperCase(),
-  minutes: typeof p.data.readingTime === "number"
-    ? p.data.readingTime
-    : estimateMinutes(p.data.description ?? ""),
-}));
+const items = posts.map((p) => {
+  // Logic to find parent
+  let parentTitle = null;
+  let parentSlug = null;
+  
+  if (p.slug.includes("/")) {
+    parentSlug = p.slug.split("/").slice(0, -1).join("/");
+    const parent = posts.find((parent) => parent.slug === parentSlug);
+    if (parent) {
+      parentTitle = parent.data.title;
+    }
+  }
+
+  return {
+    slug: p.slug,
+    title: p.data.title,
+    parentSlug,
+    parentTitle,
+    dateLabel: fmt.format(p.data.pubDate).toUpperCase(),
+    minutes: typeof p.data.readingTime === "number"
+      ? p.data.readingTime
+      : estimateMinutes(p.data.description ?? ""),
+  };
+});
 
 const INITIAL_COUNT = 5;
 ---
 
-<BaseLayout title="Arşiv">
+<BaseLayout title="Archive">
   <section class="orion">
-    <Orion class="orion-img" aria-hidden="true" />
-    <!-- If you prefer <img>, swap the two lines:
-    <img src={orionUrl} alt="Orion" class="orion-img" />
-    -->
+    {/* Static hero image: use public/images/Orion.jpg */}
+    <figure>
+      <img src={heroJpg} alt="Orion hero" class="orion-img" loading="lazy" width="600" height="300" />
+      <figcaption class="orion-credit">Image credit: manpuku7 via Getty Images</figcaption>
+    </figure>
   </section>
 
   <ul class="list" id="post-list">
     {items.map((it, idx) => (
       <li class={`row ${idx >= INITIAL_COUNT ? "hidden" : ""}`} data-idx={idx}>
         <span class="date">{it.dateLabel}</span>
-        <a class="title" href={`/blog/${it.slug}/`}>{it.title}</a>
-        <span class="read">{it.minutes} dakika</span>
+        <div class="title-wrap">
+          {it.parentTitle ? (
+             <span class="compound-title">
+               <a class="parent-link" href={`/blog/${it.parentSlug}/`}>{it.parentTitle}</a>
+               <span class="separator">: </span>
+               <a class="child-link" href={`/blog/${it.slug}/`}>{it.title}</a>
+             </span>
+          ) : (
+            <a class="title" href={`/blog/${it.slug}/`}>{it.title}</a>
+          )}
+        </div>
+        <span class="read">{it.minutes} min</span>
       </li>
     ))}
   </ul>
 
   {items.length > INITIAL_COUNT && (
     <div class="more-wrap">
-      <button id="load-more" class="more-btn">DAHA FAZLA YÜKLE</button>
+      <button id="load-more" class="more-btn">LOAD MORE</button>
     </div>
   )}
 
@@ -59,18 +89,20 @@ const INITIAL_COUNT = 5;
     :root { --muted:#7aa7a8; --line:#e9efef; --text:#0f172a; --soft:#97d5d0; }
 
     /* HERO */
-    .orion{display:grid;place-items:center;margin:2.5rem 0 1rem;text-align:center}
-    .orion-img{width:120px;height:120px;display:block;opacity:.95}
-    .orion-img {
-    width: 120px;  /* scales with CSS */
-    height: 120px; }
+  .orion{display:grid;place-items:center;margin:2.5rem 0 1rem;text-align:center}
+  .orion-img{width:600px;max-width:90%;height:auto;display:block;opacity:.95;border-radius:8px}
+  .orion-credit{color:#64748b;font-size:0.85rem;margin-top:0.5rem;text-align:center}
     /* LIST */
     .list{list-style:none;padding:0;margin:1rem auto;max-width:860px;border-top:1px solid var(--line)}
     .row{display:grid;grid-template-columns:100px 1fr 90px;align-items:center;gap:1rem;padding:.9rem 0;border-bottom:1px solid var(--line)}
     .row.hidden{display:none}
     .date{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase}
-    .title{color:var(--text);text-decoration:none}
-    .title:hover{text-decoration:underline}
+    .title-wrap { overflow: hidden; text-overflow: ellipsis; }
+    .title, .child-link {color:var(--text);text-decoration:none;font-weight:600;}
+    .title:hover, .child-link:hover{text-decoration:underline}
+    .parent-link { color: var(--muted); text-decoration: none; font-weight: 400; }
+    .parent-link:hover { text-decoration: underline; color: var(--text); }
+    .separator { color: var(--muted); margin: 0 4px; }
     .read{justify-self:end;font-size:.9rem;color:#94a3b8;white-space:nowrap}
 
     /* BUTTON */
@@ -91,7 +123,7 @@ const INITIAL_COUNT = 5;
         hidden.forEach(el => el.classList.remove('hidden'));
         if (!document.querySelector('.row.hidden')) {
             btn.disabled = true;                 // now OK
-            btn.textContent = 'Hepsi yüklendi';
+            btn.textContent = 'All loaded';
         }
         });
     }
