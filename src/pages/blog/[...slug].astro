@@ -67,6 +67,10 @@ const d = post.data as any;
     </figure>
   )}
 
+  <article class="prose">
+    <Content />
+  </article>
+
   {/* Topics List Block */}
   {children.length > 0 && (
     <nav class="toc-children">
@@ -83,10 +87,6 @@ const d = post.data as any;
       </ul>
     </nav>
   )}
-
-  <article class="prose">
-    <Content />
-  </article>
 </PostLayout>
 
 <style>
