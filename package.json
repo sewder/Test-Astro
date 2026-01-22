@@ -19,7 +19,7 @@
     "remark-math": "^6.0.0"
   },
   "devDependencies": {
-    "astro": "^5.14.1",
+    "astro": "^5.16.13",
     "wrangler": "^4.54.0"
   }
 }
